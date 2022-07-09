@@ -1,6 +1,7 @@
 import telebot
 from weather import Weather
 
+
 token = "5176228926:AAHQi5_2OycNVRHemCcn4_DGYXzmSd6MWL4"
 bot = telebot.TeleBot(token)
 
@@ -10,8 +11,7 @@ weather_message = (
     'Погода в городе {0}\n'
     'Температура: {1}\n'
     'Небо: {2}\n'
-    'Давление: {3}\n'
-    'Дождь в течении 1/3 часов {4}'
+    'Давление: {3} атмосфер\n'
 )
 
 @bot.message_handler(content_types=['text'])
@@ -27,8 +27,7 @@ def get_text_messages(message):
                             weather_message.format(users_cities[message.from_user.id],
                             w.get_temperature(),
                             w.get_detailed_weather(),
-                            w.get_pressure(),
-                            w.get_rain()))
+                            w.get_pressure()))
         except KeyError:
             bot.send_message(message.from_user.id, 'Сначала выберите город (/change_city)')
         
@@ -41,20 +40,19 @@ def get_text_messages(message):
 
 def get_city(message):
 
-    try:
-        w = Weather(message.text)
-        w.get_detailed_weather()
-    except Exception:
-        bot.send_message(message, 'Ваш город не найден')
+    check = Weather(message.text).create_user_weather()
+    if check == False:
+        bot.send_message(message.from_user.id, f'Не найдено место: {message.text}\n'
+                                               f'Повторить ввод? /change_city')
+        return None
 
-    w = Weather(user_city=message.text)
+    w = Weather(message.text)
     users_cities[message.from_user.id] = message.text
     bot.send_message(message.from_user.id,
                      weather_message.format(users_cities[message.from_user.id],
                      w.get_temperature(),
                      w.get_detailed_weather(),
-                     w.get_pressure(),
-                     w.get_rain()))
+                     w.get_pressure()))
 
         
 

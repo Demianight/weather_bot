@@ -1,6 +1,8 @@
 from subprocess import DETACHED_PROCESS
+from xml.dom import NotFoundErr
 from pyowm import OWM
 from pyowm.utils.config import get_default_config
+from pyowm.commons.exceptions import NotFoundError
 
 
 class Weather:
@@ -14,10 +16,13 @@ class Weather:
     config_dict['language'] = 'ru' 
     
     def create_user_weather(self):
-        owm = OWM('5fdd4f577868060bfa28fd495962d8ec')
-        mgr = owm.weather_manager()
-        observation = mgr.weather_at_place(self.user_city)
-        user_weather = observation.weather
+        try:
+            owm = OWM('5fdd4f577868060bfa28fd495962d8ec')
+            mgr = owm.weather_manager()
+            observation = mgr.weather_at_place(self.user_city)
+            user_weather = observation.weather
+        except NotFoundError:
+            return False
         return user_weather
 
     def get_temperature(self):
@@ -29,9 +34,5 @@ class Weather:
         return detailed_weather
 
     def get_pressure(self):
-        pressure = self.create_user_weather().barometric_pressure()
-        return pressure
-
-    def get_rain(self):
-        rain = self.create_user_weather().weather.rain
-        return str(rain['1h']) + ' ' + str(rain['3h'])
+        pressure = self.create_user_weather().barometric_pressure()['press']
+        return pressure / 1000
