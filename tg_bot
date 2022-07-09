@@ -1,0 +1,48 @@
+import telebot
+from weather import Weather
+
+token = "5176228926:AAHQi5_2OycNVRHemCcn4_DGYXzmSd6MWL4"
+bot = telebot.TeleBot(token)
+
+users_cities = {}
+w = Weather()
+
+@bot.message_handler(content_types=['text'])
+def get_text_messages(message):
+    if message.text == "Привет":
+        bot.send_message(message.from_user.id, 'Привет')
+    elif message.text == '/help':
+        bot.send_message(message.from_user.id, 'Доступные команды:\n/help\n/weather\n/change_city')
+    elif message.text == "/weather":
+        try:
+            w = Weather(users_cities[message.from_user.id])      
+            bot.send_message(message.from_user.id, f'Погода в городе {users_cities[message.from_user.id]}\n'
+                                                   f'Температура: {w.get_temperature()}\n'
+                                                   f'Небо: {w.get_detailed_weather()}\n')
+        except KeyError:
+            bot.send_message(message.from_user.id, 'Сначала выберите город (/change_city)')
+        
+        
+    elif message.text == '/change_city':
+        bot.send_message(message.from_user.id, f"Введите свой город: ")
+        bot.register_next_step_handler(message, get_city)
+    else:
+        bot.send_message(message.from_user.id, "Я тебя не понимаю. Напиши /help.")
+
+def get_city(message):
+
+    try:
+        w = Weather(message.text)
+        w.get_detailed_weather()
+    except Exception:
+        bot.send_message(message, 'Ваш город не найден')
+
+    w = Weather(user_city=message.text)
+    users_cities[message.from_user.id] = message.text
+    bot.send_message(message.from_user.id, f'Погода в городе {w.user_city}\n'
+                                           f'Температура: {w.get_temperature()}\n'
+                                           f'Небо: {w.get_detailed_weather()}\n')
+
+        
+
+bot.polling(none_stop=True, interval=0)
