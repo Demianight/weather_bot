@@ -27,3 +27,11 @@ class Weather:
     def get_detailed_weather(self):
         detailed_weather = self.create_user_weather().detailed_status
         return detailed_weather
+
+    def get_pressure(self):
+        pressure = self.create_user_weather().barometric_pressure()
+        return pressure
+
+    def get_rain(self):
+        rain = self.create_user_weather().weather.rain
+        return str(rain['1h']) + ' ' + str(rain['3h'])

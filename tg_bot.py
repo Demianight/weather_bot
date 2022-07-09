@@ -6,6 +6,13 @@ bot = telebot.TeleBot(token)
 
 users_cities = {}
 w = Weather()
+weather_message = (
+    'Погода в городе {0}\n'
+    'Температура: {1}\n'
+    'Небо: {2}\n'
+    'Давление: {3}\n'
+    'Дождь в течении 1/3 часов {4}'
+)
 
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
@@ -16,9 +23,12 @@ def get_text_messages(message):
     elif message.text == "/weather":
         try:
             w = Weather(users_cities[message.from_user.id])      
-            bot.send_message(message.from_user.id, f'Погода в городе {users_cities[message.from_user.id]}\n'
-                                                   f'Температура: {w.get_temperature()}\n'
-                                                   f'Небо: {w.get_detailed_weather()}\n')
+            bot.send_message(message.from_user.id,
+                            weather_message.format(users_cities[message.from_user.id],
+                            w.get_temperature(),
+                            w.get_detailed_weather(),
+                            w.get_pressure(),
+                            w.get_rain()))
         except KeyError:
             bot.send_message(message.from_user.id, 'Сначала выберите город (/change_city)')
         
@@ -39,9 +49,12 @@ def get_city(message):
 
     w = Weather(user_city=message.text)
     users_cities[message.from_user.id] = message.text
-    bot.send_message(message.from_user.id, f'Погода в городе {w.user_city}\n'
-                                           f'Температура: {w.get_temperature()}\n'
-                                           f'Небо: {w.get_detailed_weather()}\n')
+    bot.send_message(message.from_user.id,
+                     weather_message.format(users_cities[message.from_user.id],
+                     w.get_temperature(),
+                     w.get_detailed_weather(),
+                     w.get_pressure(),
+                     w.get_rain()))
 
         
 
