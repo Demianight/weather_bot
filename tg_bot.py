@@ -1,8 +1,8 @@
 import telebot
 from weather import Weather
 
-
-token = "5176228926:AAHQi5_2OycNVRHemCcn4_DGYXzmSd6MWL4"
+token_file = open('token', 'r')
+token = token_file.readline()
 bot = telebot.TeleBot(token)
 
 users_cities = {}
@@ -30,8 +30,6 @@ def get_text_messages(message):
                             w.get_pressure()))
         except KeyError:
             bot.send_message(message.from_user.id, 'Сначала выберите город (/change_city)')
-        
-        
     elif message.text == '/change_city':
         bot.send_message(message.from_user.id, f"Введите свой город: ")
         bot.register_next_step_handler(message, get_city)
